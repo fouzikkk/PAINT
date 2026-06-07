@@ -1,0 +1,34 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h2>{% block admin_title %}Panel administratora{% endblock %}</h2>
+        <p>{% block admin_subtitle %}Zarzadzaj adopcjami, ogłoszeniami, schroniskami i wiadomościami.{% endblock %}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <nav class="admin-tabs" aria-label="Nawigacja panelu administratora">
+            {% with current=request.resolver_match.url_name %}
+            <a href="{% url 'admin_panel' %}" {% if current == 'admin_panel' %}class="active"{% endif %}>Podsumowanie</a>
+            <a href="{% url 'admin_animal_add' %}" {% if current == 'admin_animal_add' %}class="active"{% endif %}>Dodaj ogłoszenie</a>
+            <a href="{% url 'admin_animals' %}" {% if current == 'admin_animals' or current == 'admin_animal_edit' %}class="active"{% endif %}>Ogłoszenia</a>
+            <a href="{% url 'admin_shelters' %}" {% if current == 'admin_shelters' or current == 'admin_shelter_create' %}class="active"{% endif %}>Schroniska</a>
+            <a href="{% url 'admin_users' %}" {% if current == 'admin_users' %}class="active"{% endif %}>Użytkownicy</a>
+            <a href="{% url 'admin_applications' %}" {% if current == 'admin_applications' %}class="active"{% endif %}>Wnioski</a>
+            <a href="{% url 'admin_messages' %}" {% if current == 'admin_messages' %}class="active"{% endif %}>Wiadomości</a>
+            {% endwith %}
+        </nav>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="form-message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% block admin_content %}{% endblock %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,47 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h2>Kontakt ze schroniskiem</h2>
+        <p>Masz pytanie o adopcję, wizytę albo konkretne zwierzę? Napisz do nas.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container contact-layout">
+        <aside class="card">
+            <h3>Dane kontaktowe</h3>
+            <p><strong>Nazwa:</strong> Przyjazna Łapa</p>
+            <p><strong>Adres:</strong> ul. Zielona 12, 30-001 Kraków</p>
+            <p><strong>Telefon:</strong> 123 456 789</p>
+            <p><strong>E-mail:</strong> kontakt@przyjaznalapa.pl</p>
+            <p><strong>Godziny otwarcia:</strong> pon.-pt. 8:00-16:00, sob. 9:00-14:00</p>
+        </aside>
+        <div class="form-card">
+            <h3>Wyślij wiadomość</h3>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="form-message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            <form method="post" action="{% url 'contact_form' %}" data-validate>
+                {% csrf_token %}
+                <div class="field"><label for="contact_name">Imię i nazwisko *</label><input id="contact_name" name="name" type="text" value="{{ form_data.name }}" placeholder="Imię i nazwisko" required></div>
+                <div class="field"><label for="contact_email">Adres e-mail *</label><input id="contact_email" name="email" type="email" value="{{ form_data.email }}" placeholder="nazwa@example.com" required></div>
+                <div class="field"><label for="subject">Temat *</label><input id="subject" name="subject" type="text" value="{{ form_data.subject }}" required></div>
+                <div class="field"><label for="message">Treść wiadomości *</label><textarea id="message" name="message" rows="6" required>{{ form_data.message }}</textarea></div>
+                <button class="btn btn-main full-btn" type="submit">Wyślij wiadomość</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light">
+    <div class="container">
+        <div class="section-title"><h2>Mapa dojazdu</h2><p>Zapraszamy do kontaktu i wizyty po wcześniejszym umówieniu terminu.</p></div>
+        <div class="map-box"><iframe src="https://www.google.com/maps?q=Kraków&output=embed" loading="lazy" allowfullscreen></iframe></div>
+    </div>
+</section>
+{% endblock %}

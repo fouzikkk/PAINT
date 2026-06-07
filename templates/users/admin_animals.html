@@ -1,0 +1,78 @@
+﻿{% extends 'users/admin_base.html' %}
+
+{% block admin_title %}Ogłoszenia{% endblock %}
+{% block admin_subtitle %}Przeglądaj ogłoszenia według realnego statusu zwierzęcia i szybko przechodź do edycji.{% endblock %}
+
+{% block admin_content %}
+<div class="table-card">
+    <div class="table-head">
+        <div>
+            <h3>Lista ogłoszeń</h3>
+            <p class="muted">Dostępne oznacza, że można złożyć wniosek. W trakcie adopcji oznacza, że jest już aktywny wniosek i admin podejmuje decyzję. Adoptowane oznacza zatwierdzoną adopcję.</p>
+        </div>
+        <a href="{% url 'admin_animal_add' %}" class="btn btn-main small-btn">Dodaj ogłoszenie</a>
+    </div>
+
+    <form class="filter-panel compact-filter" method="get">
+        <div class="filter-grid">
+            <div class="field">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Wszystkie</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-main">Filtruj</button>
+            <a href="{% url 'admin_animals' %}" class="btn btn-light">Reset</a>
+        </div>
+    </form>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Zwierzę</th><th>Schronisko</th><th>Status</th><th>Adoptujący</th><th>Akcje</th></tr></thead>
+            <tbody>
+                {% for animal in animals %}
+                <tr>
+                    <td>
+                        <strong>{{ animal.name }}</strong><br>
+                        {{ animal.get_species_display }}{% if animal.breed %}, {{ animal.breed }}{% endif %}
+                    </td>
+                    <td>{{ animal.shelter.name }}<br>{{ animal.shelter.city|title }}</td>
+                    <td>{{ animal.get_status_display }}</td>
+                    <td>
+                        {% for app in animal.approved_applications %}
+                            {{ app.applicant_name|default:app.applicant.username }}<br>
+                            <span class="muted">{{ app.applicant_email|default:app.applicant.email }}</span>
+                        {% empty %}
+                            -
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <div class="inline-actions">
+                            <a href="{% url 'admin_animal_edit' animal.id %}" class="btn btn-light small-btn">Edytuj</a>
+                            <form method="post" action="{% url 'admin_animal_delete' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="animal_id" value="{{ animal.id }}">
+                                <button class="btn btn-danger small-btn" type="submit" data-confirm="Czy na pewno usunąć to ogłoszenie?">Usuń</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">Brak ogłoszeń w wybranym widoku.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="pagination" aria-label="Stronicowanie">
+        {% if page_obj.has_previous %}<a class="btn btn-light small-btn" href="?status={{ status_filter }}&page={{ page_obj.previous_page_number }}">Poprzednia</a>{% endif %}
+        <span class="badge">Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a class="btn btn-light small-btn" href="?status={{ status_filter }}&page={{ page_obj.next_page_number }}">Następna</a>{% endif %}
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

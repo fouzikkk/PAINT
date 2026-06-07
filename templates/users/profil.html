@@ -1,0 +1,85 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h2>Konto</h2>
+        <p>Zarzadzaj danymi kontaktowymi, adresem e-mail i haslem.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container auth-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="form-message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="form-card">
+            <h3>Dane osobowe</h3>
+            <form method="post" action="{% url 'profile' %}" data-validate>
+                {% csrf_token %}
+                <input type="hidden" name="update_details" value="1">
+                <div class="field">
+                    <label for="{{ details_form.full_name.id_for_label }}">Imię i nazwisko</label>
+                    {{ details_form.full_name }}
+                </div>
+                <div class="field">
+                    <label for="{{ details_form.phone_number.id_for_label }}">Numer telefonu</label>
+                    {{ details_form.phone_number }}
+                </div>
+                <button class="btn btn-main full-btn" type="submit">Zapisz dane</button>
+            </form>
+        </div>
+
+        <div class="form-card">
+            <h3>Adres e-mail</h3>
+            <form method="post" action="{% url 'profile' %}" data-validate>
+                {% csrf_token %}
+                <input type="hidden" name="update_email" value="1">
+                <p class="form-intro">Obecny adres: {{ user.email|default:"brak adresu e-mail" }}. Wpisz nowy adres poniżej, jeśli chcesz go zmieńic.</p>
+                <div class="field">
+                    <label for="{{ email_form.new_email.id_for_label }}">Nowy adres e-mail *</label>
+                    {{ email_form.new_email }}
+                </div>
+                <div class="field">
+                    <label for="{{ email_form.new_email_repeat.id_for_label }}">Potwierdź adres e-mail *</label>
+                    {{ email_form.new_email_repeat }}
+                </div>
+                <button class="btn btn-main full-btn" type="submit">Zapisz e-mail</button>
+            </form>
+        </div>
+
+        <div class="form-card">
+            <h3>Zmiana hasła</h3>
+            <form method="post" action="{% url 'profile' %}" data-validate>
+                {% csrf_token %}
+                <input type="hidden" name="change_password" value="1">
+                <div class="field">
+                    <label for="{{ password_form.old_password.id_for_label }}">Obecne hasło *</label>
+                    <div class="password-row">
+                        {{ password_form.old_password }}
+                        <button class="btn btn-light" type="button" data-password-button="#{{ password_form.old_password.id_for_label }}">Pokaż</button>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="{{ password_form.new_password1.id_for_label }}">Nowe hasło *</label>
+                    <div class="password-row">
+                        {{ password_form.new_password1 }}
+                        <button class="btn btn-light" type="button" data-password-button="#{{ password_form.new_password1.id_for_label }}">Pokaż</button>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="{{ password_form.new_password2.id_for_label }}">Powtórz nowe hasło *</label>
+                    <div class="password-row">
+                        {{ password_form.new_password2 }}
+                        <button class="btn btn-light" type="button" data-password-button="#{{ password_form.new_password2.id_for_label }}">Pokaż</button>
+                    </div>
+                </div>
+                <button class="btn btn-main full-btn" type="submit">Zmień hasło</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

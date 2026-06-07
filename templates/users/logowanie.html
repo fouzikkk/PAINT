@@ -1,0 +1,73 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h2>Konto użytkownika</h2>
+        <p>Wybierz logowanie, jeżeli masz już konto, albo rejestrację, jeżeli chcesz założyć nowe.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container auth-container">
+        <div class="auth-box">
+            <div class="auth-switch" aria-label="Wybór formularza">
+                <label class="auth-option {% if active_panel != 'register' %}active{% endif %}" data-auth-label="login">
+                    <input type="radio" name="auth_choice" value="login" {% if active_panel != 'register' %}checked{% endif %} data-auth-choice>
+                    <span>Logowanie</span>
+                </label>
+                <label class="auth-option {% if active_panel == 'register' %}active{% endif %}" data-auth-label="register">
+                    <input type="radio" name="auth_choice" value="register" {% if active_panel == 'register' %}checked{% endif %} data-auth-choice>
+                    <span>Rejestracja</span>
+                </label>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="form-message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="auth-panel {% if active_panel == 'register' %}hidden{% endif %}" data-auth-panel="login">
+                <h3>Zaloguj się</h3>
+                <p class="form-intro">Podaj dane swojego konta, aby przejść do zgłoszeń i panelu adopcji.</p>
+                <form method="post" action="{% url 'login' %}" data-validate>
+                    {% csrf_token %}
+                    {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+                    <div class="field"><label for="login_username">Nazwa użytkownika *</label><input id="login_username" name="username" type="text" value="{{ login_username }}" required></div>
+                    <div class="field">
+                        <label for="login_password">Hasło *</label>
+                        <div class="password-row">
+                            <input id="login_password" name="password" type="password" required>
+                            <button class="btn btn-light" type="button" data-password-button="#login_password">Pokaż</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-main full-btn" type="submit">Zaloguj się</button>
+                </form>
+            </div>
+
+            <div class="auth-panel {% if active_panel != 'register' %}hidden{% endif %}" data-auth-panel="register">
+                <h3>Załóż konto</h3>
+                <p class="form-intro">Utwórz konto, aby wysyłać formularze adopcyjne i kontaktować się ze schroniskiem.</p>
+                <form method="post" action="{% url 'login' %}" data-validate>
+                    {% csrf_token %}
+                    {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+                    <input type="hidden" name="register" value="true">
+                    <div class="field"><label for="register_username">Nazwa użytkownika *</label><input id="register_username" name="username" type="text" value="{{ registration_data.username }}" required></div>
+                    <div class="field"><label for="register_email">Adres e-mail *</label><input id="register_email" name="email" type="email" value="{{ registration_data.email }}" placeholder="nazwa@example.com" required></div>
+                    <div class="field">
+                        <label for="register_password">Hasło *</label>
+                        <div class="password-row">
+                            <input id="register_password" name="password" type="password" required>
+                            <button class="btn btn-light" type="button" data-password-button="#register_password">Pokaż</button>
+                        </div>
+                    </div>
+                    <div class="field"><label for="register_password_repeat">Powtórz hasło *</label><input id="register_password_repeat" name="password_repeat" type="password" required></div>
+                    <button class="btn btn-main full-btn" type="submit">Załóż konto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

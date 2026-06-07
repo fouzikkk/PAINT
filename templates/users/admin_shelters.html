@@ -1,0 +1,79 @@
+﻿{% extends 'users/admin_base.html' %}
+
+{% block admin_title %}Schroniska{% endblock %}
+{% block admin_subtitle %}Zarejestrowane placówki, do których przypisujesz ogłoszenia adopcyjne.{% endblock %}
+
+{% block admin_content %}
+<div class="table-card">
+    <div class="table-head">
+        <h3>Zarejestrowane schroniska</h3>
+        <a href="{% url 'admin_shelter_create' %}" class="btn btn-main small-btn">Zarejestruj schronisko</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Schronisko</th><th>Kontakt</th><th>Ogłoszenia</th></tr></thead>
+            <tbody>
+                {% for shelter in shelters %}
+                <tr>
+                    <td>
+                        <strong>{{ shelter.name }}</strong><br>
+                        {{ shelter.city|title }}<br>
+                        {{ shelter.address|linebreaksbr }}
+                    </td>
+                    <td>{{ shelter.phone|default:"-" }}<br>{{ shelter.email|default:"-" }}</td>
+                    <td>
+                        <strong>{{ shelter.animals_count }}</strong><br>
+                        <button class="btn btn-light small-btn" type="button" data-modal-open="shelter-modal-{{ shelter.id }}">Pokaż ogłoszenia</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3">Brak schronisk. Dodaj pierwsze schronisko, aby tworzyc ogłoszenia.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% for shelter in shelters %}
+    <dialog class="modal" id="shelter-modal-{{ shelter.id }}" data-modal aria-labelledby="shelter-title-{{ shelter.id }}">
+        <div class="modal-head">
+            <div>
+                <span class="badge">{{ shelter.animals_count }} ogłoszeń</span>
+                <h3 id="shelter-title-{{ shelter.id }}">{{ shelter.name }}</h3>
+                <p class="muted">{{ shelter.city|title }}, {{ shelter.address|linebreaksbr }}</p>
+            </div>
+            <button class="btn btn-light small-btn" type="button" data-modal-close>Zamknij</button>
+        </div>
+
+        <div class="modal-grid">
+            <section class="modal-section">
+                <h4>Kontakt</h4>
+                <p>{{ shelter.phone|default:"Brak telefonu" }}</p>
+                <p>{{ shelter.email|default:"Brak e-maila" }}</p>
+            </section>
+            <section class="modal-section">
+                <h4>Adres</h4>
+                <p>{{ shelter.address|linebreaksbr }}</p>
+            </section>
+        </div>
+
+        <section class="modal-section">
+            <h4>Ogłoszenia schroniska</h4>
+            <div class="summary-list">
+                {% for animal in shelter.animals.all %}
+                <article class="summary-item">
+                    <div>
+                        <strong><a href="{% url 'animal_details' animal.id %}">{{ animal.name }}</a></strong>
+                        <span class="badge">{{ animal.get_status_display }}</span>
+                    </div>
+                    <p class="muted">{{ animal.get_species_display }}{% if animal.breed %}, {{ animal.breed }}{% endif %} | {{ animal.age }} lat</p>
+                    <p>{{ animal.description|truncatechars:180 }}</p>
+                </article>
+                {% empty %}
+                <p>Brak ogłoszeń przypisanych do tego schroniska.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </dialog>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+﻿{% extends 'users/admin_base.html' %}
+
+{% block admin_title %}Zarejestruj schronisko{% endblock %}
+{% block admin_subtitle %}Te dane będą widoczne przy zwierzętach i pomogą użytkownikowi skontaktować się z placówką.{% endblock %}
+
+{% block admin_content %}
+<div class="form-card admin-form-card">
+    <form method="post" data-validate>
+        {% csrf_token %}
+        <div class="field"><label for="{{ form.name.id_for_label }}">Nazwa schroniska *</label>{{ form.name }}</div>
+        <div class="form-grid">
+            <div class="field"><label for="{{ form.city.id_for_label }}">Miasto *</label>{{ form.city }}</div>
+            <div class="field"><label for="{{ form.phone.id_for_label }}">Telefon</label>{{ form.phone }}</div>
+        </div>
+        <div class="field"><label for="{{ form.email.id_for_label }}">E-mail</label>{{ form.email }}</div>
+        <div class="field"><label for="{{ form.address.id_for_label }}">Adres *</label>{{ form.address }}</div>
+        <div class="card-buttons">
+            <button class="btn btn-main" type="submit">Zapisz schronisko</button>
+            <a href="{% url 'admin_shelters' %}" class="btn btn-light">Wróć do listy</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

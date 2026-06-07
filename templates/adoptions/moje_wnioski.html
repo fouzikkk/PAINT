@@ -1,0 +1,64 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h2>Moje wnioski</h2>
+        <p>Status Twoich zgłoszeń adopcyjnych.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container table-card">
+        <h3>Złóżone wnioski</h3>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="form-message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Zwierzę</th><th>Telefon</th><th>Status</th><th>Informacja</th><th>Data</th><th>Akcje</th></tr></thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'animal_details' app.animal.id %}">{{ app.animal.name }}</a><br>
+                            <span class="muted">{{ app.animal.shelter.name }}</span>
+                        </td>
+                        <td>{{ app.phone_number }}</td>
+                        <td>{{ app.get_status_display }}</td>
+                        <td class="wide-cell">
+                            {% if app.status == 'approved' %}
+                                <strong>Adopcja zatwierdzona.</strong>
+                                <p>{{ app.contact_message|default:"Schronisko skontaktuje się z Tobą telefonicznie w sprawie dalszych kroków."|linebreaksbr }}</p>
+                                {% if app.contact_at %}
+                                <p><strong>Planowany kontakt:</strong> {{ app.contact_at|date:"d.m.Y H:i" }}</p>
+                                {% endif %}
+                            {% elif app.status == 'rejected' %}
+                                <span class="muted">Ten wniosek został zamkniety przez administratora.</span>
+                            {% else %}
+                                <span class="muted">Wniosek czeka na decyzję schroniska.</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ app.created_at|date:"d.m.Y" }}</td>
+                        <td>
+                            {% if app.status != 'approved' %}
+                            <form method="post" action="{% url 'cancel_application' app.id %}" class="fav-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger small-btn" data-confirm="Czy na pewno wycofać ten wniosek adopcyjny?">Anuluj</button>
+                            </form>
+                        {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6">Nie masz jeszcze zadnych wniosków. <a href="{% url 'animals_list' %}">Przeglądaj zwierzęta</a>.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

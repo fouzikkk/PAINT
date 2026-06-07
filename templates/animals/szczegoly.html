@@ -1,0 +1,69 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h2>Szczegóły zwierzęcia</h2>
+        <p>Poznaj charakter, potrżeby i informacje o wybranym zwierzęciu.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container details-layout">
+        <div class="details-media">
+            <div class="details-photo"><img src="{% if animal.image %}{{ animal.image.url }}{% else %}{% static 'img/placeholder.svg' %}{% endif %}" alt="{{ animal.name }}"></div>
+            <article class="details-description">
+                <h3>Opis zwierzęcia</h3>
+                <p>{{ animal.description|linebreaksbr }}</p>
+            </article>
+        </div>
+        <article class="details-card">
+            <div class="animal-meta">
+                <span class="badge">{{ animal.get_species_display }}</span>
+                <span class="badge">{{ animal.age }} lat</span>
+                <span class="badge">{{ animal.shelter.city|title }}</span>
+            </div>
+            <h2>{{ animal.name }}</h2>
+            <div class="info-list">
+                <div><strong>Gatunek</strong><span>{{ animal.get_species_display }}</span></div>
+                <div><strong>Wiek</strong><span>{{ animal.age }} lat</span></div>
+                <div><strong>Wielkość</strong><span>{{ animal.get_size_display }}</span></div>
+                <div><strong>Płeć</strong><span>{{ animal.get_gender_display }}</span></div>
+                {% if animal.breed %}<div><strong>Rasa</strong><span>{{ animal.breed }}</span></div>{% endif %}
+                {% if animal.weight_kg %}<div><strong>Waga</strong><span>{{ animal.weight_kg }} kg</span></div>{% endif %}
+                <div><strong>Sterylizacja</strong><span>{% if animal.is_sterilized %}Tak{% else %}Nie{% endif %}</span></div>
+                <div><strong>Szczepienia</strong><span>{% if animal.is_vaccinated %}Tak{% else %}Nie{% endif %}</span></div>
+                <div><strong>Chip</strong><span>{% if animal.is_chipped %}Tak{% else %}Nie{% endif %}</span></div>
+                <div><strong>Czy jest przyjazny dla dzieci?</strong><span>{% if animal.good_with_children %}Tak{% else %}Nie{% endif %}</span></div>
+                <div><strong>Czy akceptuje koty?</strong><span>{% if animal.good_with_cats %}Tak{% else %}Nie{% endif %}</span></div>
+                <div><strong>Czy akceptuje inne psy?</strong><span>{% if animal.good_with_dogs %}Tak{% else %}Nie{% endif %}</span></div>
+                <div><strong>Schronisko</strong><span>{{ animal.shelter.name }}</span></div>
+                <div><strong>Miasto</strong><span>{{ animal.shelter.city|title }}</span></div>
+                {% if animal.shelter.phone %}<div><strong>Telefon</strong><span>{{ animal.shelter.phone }}</span></div>{% endif %}
+                {% if animal.shelter.email %}<div class="info-email-row"><strong>E-mail</strong><span>{{ animal.shelter.email }}</span></div>{% endif %}
+                <div><strong>Status</strong><span>{{ animal.get_status_display }}</span></div>
+            </div>
+            <div class="card-buttons">
+                {% if animal.status == 'available' %}
+                <a href="{% url 'adoption_form' %}?animal={{ animal.id }}" class="btn btn-main">Złóż wniosek</a>
+                {% endif %}
+                {% if not user.is_staff %}
+                <a href="{% url 'contact_form' %}?animal={{ animal.id }}" class="btn btn-light">Zapytaj o {{ animal.name }}</a>
+                {% endif %}
+            </div>
+        </article>
+    </div>
+</section>
+
+<section class="section bg-light">
+    <div class="container">
+        <div class="section-title"><h2>Dodatkowe informacje</h2><p>Przed adopcją schronisko może poprosić o rozmowę, wizytę oraz potwierdzenie warunków opieki.</p></div>
+        <div class="grid-3">
+            <article class="card"><h3>Zdrowie</h3><p>Informacje weterynaryjne są potwierdzane przez schronisko przed finalną adopcją.</p></article>
+            <article class="card"><h3>Zachowanie</h3><p>Pracownik schroniska opowie o charakterze zwierzęcia i codziennych potrzebach.</p></article>
+            <article class="card"><h3>Potrżeby</h3><p>Decyzja adopcyjna powinna uwzględniać czas, miejsce i możliwości opiekuna.</p></article>
+        </div>
+    </div>
+</section>
+{% endblock %}

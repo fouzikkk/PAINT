@@ -1,0 +1,28 @@
+﻿{% extends 'users/admin_base.html' %}
+
+{% block admin_title %}Panel administratora{% endblock %}
+{% block admin_subtitle %}Szybki przegląd tego, co aktualnie dzieje się w centrum adopcyjnym.{% endblock %}
+
+{% block admin_content %}
+<div class="stats-grid admin-stats">
+    <a class="stat-box" href="{% url 'admin_animals' %}?status=available"><strong>{{ available_count }}</strong><span>dostępnych zwierząt</span></a>
+    <a class="stat-box" href="{% url 'admin_animals' %}?status=pending"><strong>{{ pending_count }}</strong><span>w trakcie adopcji</span></a>
+    <a class="stat-box" href="{% url 'admin_animals' %}?status=adopted"><strong>{{ adopted_count }}</strong><span>adoptowanych</span></a>
+    <a class="stat-box" href="{% url 'admin_messages' %}"><strong>{{ messages_pending_count }}</strong><span>wiadomości oczekuje</span></a>
+</div>
+
+<div class="grid-3 admin-shortcuts">
+    <a class="card" href="{% url 'admin_animal_add' %}">
+        <h3>Dodaj ogłoszenie</h3>
+        <p>Utwórz profil zwierzęcia i przypisz go do zarejestrowanego schroniska.</p>
+    </a>
+    <a class="card" href="{% url 'admin_shelter_create' %}">
+        <h3>Zarejestruj schronisko</h3>
+        <p>Dodaj dane placówki, które będą widoczne przy adopcji i w profilu zwierzęcia.</p>
+    </a>
+    <a class="card" href="{% url 'admin_applications' %}">
+        <h3>Sprawdz wnioski</h3>
+        <p>Przeglądaj zgłoszenia adopcyjne i zmieńiaj ich status.</p>
+    </a>
+</div>
+{% endblock %}

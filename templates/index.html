@@ -1,0 +1,81 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-card">
+            <span class="eyebrow">Adopcja zwierząt</span>
+            <h2>Znajdź przyjaciela, który czeka na dom</h2>
+            <p class="lead">Witaj w Przyjaznej Łapie. Pomagamy spokojnie poznać psy i koty z lokalnych schronisk, wybrać dobrego towarzysza i przejść przez adopcję krok po kroku.</p>
+            <div class="hero-buttons">
+                <a href="{% url 'animals_list' %}" class="btn btn-main">Przeglądaj zwierzęta</a>
+                <a href="{% url 'adoption_form' %}" class="btn btn-light">Złóż wniosek</a>
+            </div>
+        </div>
+        <aside class="side-card">
+            <img src="https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=1200&auto=format&fit=crop" alt="Pies w domu">
+            <div class="side-card-content">
+                <h3>Dobrze, że tu jesteś</h3>
+                <ul class="check-list">
+                    <li>poznaj zwierzęta, które naprawdę szukają domu</li>
+                    <li>sprawdź ich charakter, potrżeby i schronisko</li>
+                    <li>wyślij wniosek wtedy, gdy poczujesz, że to dobry moment</li>
+                    <li>bądź w kontakcie z opiekunami na każdym etapie</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-title center">
+            <h2>Jak przebiega adopcja?</h2>
+            <p>Najpierw wybierasz zwierzę, potem składasz wniosek, a pracownik schroniska kontaktuje się w sprawie dalszych kroków.</p>
+        </div>
+        <div class="grid-3">
+            <article class="card"><h3>1. Wybór zwierzęcia</h3><p>Przejrzyj profile zwierząt i wybierz psa lub kota, który pasuje do Twoich warunków.</p></article>
+            <article class="card"><h3>2. Wniosek adopcyjny</h3><p>Uzupełnij dane kontaktowe, doświadczenie i warunki opieki.</p></article>
+            <article class="card"><h3>3. Kontakt</h3><p>Po analizie zgłoszenia ustalany jest termin rozmowy lub wizyty adopcyjnej.</p></article>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light">
+    <div class="container">
+        <div class="section-title"><h2>Polecane zwierzęta</h2><p>Wybrane profile zwierząt, które czekają na nowy dom.</p></div>
+        <div class="animals-grid">
+            {% for animal in featured_animals %}
+            <article class="animal-card">
+                <img src="{% if animal.image %}{{ animal.image.url }}{% else %}{% static 'img/placeholder.svg' %}{% endif %}" alt="{{ animal.name }}">
+                <div class="animal-content">
+                    <div class="animal-meta">
+                        <span class="badge">{{ animal.get_species_display }}</span>
+                        <span class="badge">{{ animal.age }} lat</span>
+                        <span class="badge">{{ animal.shelter.city|title }}</span>
+                    </div>
+                    <h3>{{ animal.name }}</h3>
+                    {% if animal.breed %}<p class="muted">{{ animal.breed }}</p>{% endif %}
+                    <p>{{ animal.description }}</p>
+                    <div class="card-buttons">
+                        <a href="{% url 'animal_details' animal.id %}" class="btn btn-main small-btn">Szczegóły</a>
+                        <a href="{% url 'adoption_form' %}?animal={{ animal.id }}" class="btn btn-light small-btn">Adoptuj</a>
+                    </div>
+                </div>
+            </article>
+            {% empty %}
+            <p>Brak zwierząt do wyświetlenia.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container stats-grid">
+        <div class="stat-box"><strong>{{ adopted_count }}</strong><span>adoptowanych zwierząt</span></div>
+        <div class="stat-box"><strong>{{ cities_count }}</strong><span>miast z adopcjami</span></div>
+        <div class="stat-box"><strong>{{ available_count }}</strong><span>zwierząt czeka na dom</span></div>
+    </div>
+</section>
+{% endblock %}

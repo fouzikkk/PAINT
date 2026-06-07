@@ -1,0 +1,111 @@
+﻿{% extends 'users/admin_base.html' %}
+
+{% block admin_title %}Wiadomości kontaktowe{% endblock %}
+{% block admin_subtitle %}Oznaczaj sprawy jako oczekujące albo rozwiązane, żeby nic nie uciekło z kolejki.{% endblock %}
+
+{% block admin_content %}
+<div class="table-card">
+    <div class="table-head">
+        <h3>Wiadomości</h3>
+    </div>
+    <form class="filter-panel compact-filter" method="get">
+        <div class="filter-grid">
+            <div class="field">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Wszystkie</option>
+                    {% for value, label in message_statuses %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-main">Filtruj</button>
+            <a href="{% url 'admin_messages' %}" class="btn btn-light">Reset</a>
+        </div>
+    </form>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Od</th><th>E-mail</th><th>Temat</th><th>Data</th><th>Status</th><th>Akcje</th></tr></thead>
+            <tbody>
+                {% for msg in contact_messages %}
+                <tr>
+                    <td>{{ msg.name }}</td>
+                    <td>{{ msg.email }}</td>
+                    <td>{{ msg.subject }}</td>
+                    <td>{{ msg.created_at|date:"d.m.Y" }}</td>
+                    <td>{{ msg.get_status_display }}</td>
+                    <td><button class="btn btn-light small-btn" type="button" data-modal-open="message-modal-{{ msg.id }}">Szczegóły i odpowiedź</button></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6">Brak wiadomości w wybranym widoku.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% for msg in contact_messages %}
+    <dialog class="modal" id="message-modal-{{ msg.id }}" data-modal aria-labelledby="message-title-{{ msg.id }}">
+        <div class="modal-head">
+            <div>
+                <span class="badge">{{ msg.get_status_display }}</span>
+                <h3 id="message-title-{{ msg.id }}">{{ msg.subject }}</h3>
+                <p class="muted">{{ msg.created_at|date:"d.m.Y H:i" }}</p>
+            </div>
+            <button class="btn btn-light small-btn" type="button" data-modal-close>Zamknij</button>
+        </div>
+
+        <div class="modal-grid">
+            <section class="modal-section">
+                <h4>Nadawca</h4>
+                <p><strong>{{ msg.name }}</strong></p>
+                <p>{{ msg.email }}</p>
+                {% if msg.sender %}<p class="muted">Konto: {{ msg.sender.username }}</p>{% endif %}
+            </section>
+            <section class="modal-section">
+                <h4>Status odpowiedzi</h4>
+                {% if msg.reply %}
+                <p>Odpowiedziano: {{ msg.replied_at|date:"d.m.Y H:i" }}</p>
+                {% if msg.replied_by %}<p class="muted">Przez: {{ msg.replied_by.username }}</p>{% endif %}
+                {% else %}
+                <p>Brak odpowiedzi.</p>
+                {% endif %}
+            </section>
+        </div>
+
+        <section class="modal-section">
+            <h4>Treść wiadomości</h4>
+            <p>{{ msg.message|linebreaksbr }}</p>
+        </section>
+
+        <form method="post" action="{% url 'admin_message_update' %}" class="modal-form">
+            {% csrf_token %}
+            <input type="hidden" name="message_id" value="{{ msg.id }}">
+            <div class="field">
+                <label for="message-status-{{ msg.id }}">Status</label>
+                <select id="message-status-{{ msg.id }}" name="status">
+                    {% for value, label in message_statuses %}
+                    <option value="{{ value }}" {% if msg.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="reply-{{ msg.id }}">Odpowiedź dla użytkownika</label>
+                <textarea id="reply-{{ msg.id }}" name="reply" rows="6" placeholder="Napisz odpowiedź, którą użytkownik zobaczy w swoich wiadomościach.">{{ msg.reply }}</textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-main" type="submit">Zapisz odpowiedź</button>
+            </div>
+        </form>
+    </dialog>
+    {% endfor %}
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="pagination" aria-label="Stronicowanie">
+        {% if page_obj.has_previous %}<a class="btn btn-light small-btn" href="?status={{ status_filter }}&page={{ page_obj.previous_page_number }}">Poprzednia</a>{% endif %}
+        <span class="badge">Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a class="btn btn-light small-btn" href="?status={{ status_filter }}&page={{ page_obj.next_page_number }}">Następna</a>{% endif %}
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

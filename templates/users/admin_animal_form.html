@@ -1,0 +1,44 @@
+﻿{% extends 'users/admin_base.html' %}
+
+{% block admin_title %}{{ title }}{% endblock %}
+{% block admin_subtitle %}Wybierz schronisko z listy i uzupełnij dane widoczne w ogłoszeniu adopcyjnym.{% endblock %}
+
+{% block admin_content %}
+<div class="form-card admin-form-card">
+    <form method="post" enctype="multipart/form-data" data-validate>
+        {% csrf_token %}
+        <div class="field"><label for="{{ form.name.id_for_label }}">Nazwa zwierzęcia *</label>{{ form.name }}</div>
+        <div class="form-grid">
+            <div class="field"><label for="{{ form.species.id_for_label }}">Gatunek *</label>{{ form.species }}</div>
+            <div class="field"><label for="{{ form.age.id_for_label }}">Wiek *</label>{{ form.age }}</div>
+        </div>
+        <div class="form-grid">
+            <div class="field"><label for="{{ form.shelter.id_for_label }}">Schronisko *</label>{{ form.shelter }}</div>
+            <div class="field"><label for="{{ form.size.id_for_label }}">Wielkość *</label>{{ form.size }}</div>
+        </div>
+        <div class="form-grid">
+            <div class="field"><label for="{{ form.gender.id_for_label }}">Płeć</label>{{ form.gender }}</div>
+            <div class="field"><label for="{{ form.breed.id_for_label }}">Rasa</label>{{ form.breed }}</div>
+        </div>
+        <div class="form-grid">
+            <div class="field"><label for="{{ form.weight_kg.id_for_label }}">Waga w kg</label>{{ form.weight_kg }}</div>
+            <div class="field"><label for="{{ form.status.id_for_label }}">Status *</label>{{ form.status }}</div>
+        </div>
+        <div class="checkbox-grid">
+            <label class="checkbox-row">{{ form.is_sterilized }} <span>Sterylizacja</span></label>
+            <label class="checkbox-row">{{ form.is_vaccinated }} <span>Szczepienia</span></label>
+            <label class="checkbox-row">{{ form.is_chipped }} <span>Chip</span></label>
+            <label class="checkbox-row">{{ form.good_with_children }} <span>Dobry kontakt z dziećmi</span></label>
+            <label class="checkbox-row">{{ form.good_with_cats }} <span>Dobry kontakt z kotami</span></label>
+            <label class="checkbox-row">{{ form.good_with_dogs }} <span>Dobry kontakt z psami</span></label>
+        </div>
+        <div class="field"><label for="{{ form.image.id_for_label }}">Zdjęcie</label>{{ form.image }}</div>
+        <div class="field"><label for="{{ form.description.id_for_label }}">Opis *</label>{{ form.description }}</div>
+        <div class="card-buttons">
+            <button class="btn btn-main" type="submit">{{ submit_label }}</button>
+            <a href="{% url 'admin_shelter_create' %}" class="btn btn-light">Dodaj schronisko</a>
+            <a href="{% url 'admin_animals' %}" class="btn btn-light">Lista ogłoszeń</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

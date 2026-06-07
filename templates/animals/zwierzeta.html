@@ -1,0 +1,79 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h2>Zwierzęta do adopcji</h2>
+        <p>Wybierz zwierzę i poznaj jego historie, charakter oraz potrżeby.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <form class="filter-panel" method="get" data-animal-filter-form>
+            <div class="result-row"><span>Filtry ogłoszeń</span><span data-results-count>{{ count }} wynikow</span></div>
+            <div class="filter-grid">
+                <div class="field"><label for="search">Imię zwierzęcia</label><input id="search" name="search" type="text" placeholder="np. Luna" value="{{ request.GET.search }}"></div>
+                <div class="field"><label for="species">Gatunek</label><select id="species" name="species">
+                    <option value="all">Wszystkie</option>
+                    <option value="pies" {% if request.GET.species == 'pies' %}selected{% endif %}>Pies</option>
+                    <option value="kot" {% if request.GET.species == 'kot' %}selected{% endif %}>Kot</option>
+                </select></div>
+                <div class="field"><label for="age">Wiek</label><select id="age" name="age">
+                    <option value="all">Dowolny</option>
+                    <option value="young" {% if request.GET.age == 'young' %}selected{% endif %}>0-3 lata</option>
+                    <option value="adult" {% if request.GET.age == 'adult' %}selected{% endif %}>4-8 lat</option>
+                    <option value="senior" {% if request.GET.age == 'senior' %}selected{% endif %}>9 lat i więcej</option>
+                </select></div>
+                <div class="field"><label for="shelter">Miasto</label><select id="shelter" name="shelter">
+                    <option value="all">Wszystkie</option>
+                    {% for city in shelters %}
+                    <option value="{{ city }}" {% if request.GET.shelter == city %}selected{% endif %}>{{ city|title }}</option>
+                    {% endfor %}
+                </select></div>
+                <button type="submit" class="btn btn-main">Filtruj</button>
+                <a href="{% url 'animals_list' %}" class="btn btn-light">Wyczyść</a>
+            </div>
+        </form>
+
+        <div class="animals-grid">
+            {% for animal in animals %}
+            <article class="animal-card">
+                <img src="{% if animal.image %}{{ animal.image.url }}{% else %}{% static 'img/placeholder.svg' %}{% endif %}" alt="{{ animal.name }}">
+                <div class="animal-content">
+                    <div class="animal-meta">
+                        <span class="badge">{{ animal.get_species_display }}</span>
+                        <span class="badge">{{ animal.age }} lat</span>
+                        <span class="badge">{{ animal.shelter.city|title }}</span>
+                    </div>
+                    <h3>{{ animal.name }}</h3>
+                    {% if animal.breed %}<p class="muted">{{ animal.breed }}</p>{% endif %}
+                    <p>{{ animal.description }}</p>
+                    <div class="card-buttons">
+                        <a href="{% url 'animal_details' animal.id %}" class="btn btn-main small-btn">Szczegóły</a>
+                        {% if animal.status == 'available' %}
+                        <a href="{% url 'adoption_form' %}?animal={{ animal.id }}" class="btn btn-light small-btn">Adoptuj</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+            {% empty %}
+            <p>Brak zwierząt spełniających kryteria.</p>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="pagination" aria-label="Stronicowanie">
+            {% if page_obj.has_previous %}
+            <a class="btn btn-light small-btn" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Poprzednia</a>
+            {% endif %}
+            <span class="badge">Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a class="btn btn-light small-btn" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Następna</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

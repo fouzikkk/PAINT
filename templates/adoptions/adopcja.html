@@ -1,0 +1,85 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h2>Formularz adopcyjny</h2>
+        <p>Uzupełnij wniosek, aby rozpocząć proces adopcji wybranego zwierzęcia.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="form-card">
+            <h3>Dane do wniosku</h3>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="form-message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not user.is_authenticated %}
+            <div class="notice-card inline-notice">
+                <h4>Zaloguj się przed wysłaniem wniosku</h4>
+                <p>Konto pozwala zapisać wniosek, śledzić jego status i bezpiecznie przechowywać dane kontaktowe.</p>
+                <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-main">Przejdź do logowania</a>
+            </div>
+            {% else %}
+            <form method="post" action="{% url 'adoption_form' %}" data-validate>
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="full_name">Imię i nazwisko *</label>
+                        <input id="full_name" name="full_name" type="text" value="{{ form_data.full_name }}" placeholder="Imię i nazwisko" required>
+                    </div>
+                    <div class="field"><label for="current_email">Adres e-mail konta</label><input id="current_email" type="email" value="{{ user.email }}" readonly></div>
+                    <div class="field"><label for="phone">Numer telefonu *</label><input id="phone" name="phone" type="text" inputmode="numeric" pattern="[0-9]{9}" maxlength="9" value="{{ form_data.phone }}" placeholder="Numer telefonu" required></div>
+                    <div class="field">
+                        <label for="animal_id">Wybrane zwierzę *</label>
+                        {% if animal %}
+                            <input type="hidden" name="animal_id" value="{{ animal.id }}">
+                            <input id="animal_id" name="animal_name" type="text" value="{{ animal.name }}" readonly required>
+                        {% else %}
+                            <select id="animal_id" name="animal_id" required>
+                                <option value="">Wybierz zwierzę</option>
+                                {% for available_animal in available_animals %}
+                                <option value="{{ available_animal.id }}" {% if selected_animal_id|stringformat:"s" == available_animal.id|stringformat:"s" %}selected{% endif %}>{{ available_animal.name }} - {{ available_animal.get_species_display }}, {{ available_animal.shelter.city|title }}</option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="field"><label for="living_conditions">Warunki mieszkaniowe *</label><input id="living_conditions" name="living_conditions" type="text" value="{{ form_data.living_conditions }}" required></div>
+                <div class="field"><label for="experience">Doświadczenie w opiece nad zwierzętami *</label><textarea id="experience" name="experience" rows="4" required>{{ form_data.experience }}</textarea></div>
+                <label class="checkbox-row"><input type="checkbox" name="truth" required> <span>Oświadczam, że podane informacje są prawdziwe.</span></label>
+                <button class="btn btn-main" type="submit">Wyślij wniosek</button>
+            </form>
+            {% endif %}
+        </div>
+
+        {% if animal %}
+        <aside class="notice-card shelter-summary">
+            <h4>Schronisko opiekujące się zwierzęciem</h4>
+            <p><strong>{{ animal.shelter.name }}</strong></p>
+            <p>{{ animal.shelter.address|linebreaksbr }}</p>
+            <p>{{ animal.shelter.city|title }}</p>
+            {% if animal.shelter.phone %}<p>Telefon: {{ animal.shelter.phone }}</p>{% endif %}
+            {% if animal.shelter.email %}<p>E-mail: {{ animal.shelter.email }}</p>{% endif %}
+        </aside>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section bg-light">
+    <div class="container">
+        <div class="section-title"><h2>Etapy po wysłaniu wniosku</h2><p>Schronisko analizuje dane i kontaktuje się z kandydatem.</p></div>
+        <div class="grid-4">
+            <article class="card"><h3>1. Wniosek</h3><p>Wypełniasz formularz adopcyjny.</p></article>
+            <article class="card"><h3>2. Weryfikacja</h3><p>Pracownik sprawdza zgłoszenie.</p></article>
+            <article class="card"><h3>3. Rozmowa</h3><p>Ustalane są szczegóły adopcji.</p></article>
+            <article class="card"><h3>4. Adopcja</h3><p>Zwierzę trafia do nowego domu.</p></article>
+        </div>
+    </div>
+</section>
+{% endblock %}

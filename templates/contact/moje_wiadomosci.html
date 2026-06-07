@@ -1,0 +1,79 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h2>Moje wiadomości</h2>
+        <p>Historia wiadomości wysłanych do centrum adopcyjnego.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container table-card">
+        <div class="table-head">
+            <h3>Wysłane wiadomości</h3>
+            <a href="{% url 'contact_form' %}" class="btn btn-main small-btn">Napisz wiadomość</a>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="form-message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Temat</th><th>Data</th><th>Status</th><th>Odpowiedź</th><th>Akcje</th></tr></thead>
+                <tbody>
+                    {% for msg in contact_messages %}
+                    <tr>
+                        <td>{{ msg.subject }}</td>
+                        <td>{{ msg.created_at|date:"d.m.Y" }}</td>
+                        <td>{{ msg.get_status_display }}</td>
+                        <td>{% if msg.reply %}Odpowiedziano{% else %}<span class="muted">Brak odpowiedzi</span>{% endif %}</td>
+                        <td><button class="btn btn-light small-btn" type="button" data-modal-open="my-message-modal-{{ msg.id }}">Szczegóły</button></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5">Nie masz jeszcze wysłanych wiadomości. <a href="{% url 'contact_form' %}">Napisz do nas</a>.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% for msg in contact_messages %}
+        <dialog class="modal" id="my-message-modal-{{ msg.id }}" data-modal aria-labelledby="my-message-title-{{ msg.id }}">
+            <div class="modal-head">
+                <div>
+                    <span class="badge">{{ msg.get_status_display }}</span>
+                    <h3 id="my-message-title-{{ msg.id }}">{{ msg.subject }}</h3>
+                    <p class="muted">{{ msg.created_at|date:"d.m.Y H:i" }}</p>
+                </div>
+                <button class="btn btn-light small-btn" type="button" data-modal-close>Zamknij</button>
+            </div>
+
+            <section class="modal-section">
+                <h4>Twoja wiadomość</h4>
+                <p>{{ msg.message|linebreaksbr }}</p>
+            </section>
+            <section class="modal-section">
+                <h4>Odpowiedź centrum adopcyjnego</h4>
+                {% if msg.reply %}
+                <p>{{ msg.reply|linebreaksbr }}</p>
+                <p class="muted">Odpowiedź z dnia {{ msg.replied_at|date:"d.m.Y H:i" }}</p>
+                {% else %}
+                <p>Wiadomość czeka na odpowiedź.</p>
+                {% endif %}
+            </section>
+        </dialog>
+        {% endfor %}
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="pagination" aria-label="Stronicowanie">
+            {% if page_obj.has_previous %}<a class="btn btn-light small-btn" href="?page={{ page_obj.previous_page_number }}">Poprzednia</a>{% endif %}
+            <span class="badge">Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}<a class="btn btn-light small-btn" href="?page={{ page_obj.next_page_number }}">Następna</a>{% endif %}
+        </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

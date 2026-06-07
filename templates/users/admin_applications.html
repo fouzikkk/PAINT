@@ -1,0 +1,123 @@
+﻿{% extends 'users/admin_base.html' %}
+
+{% block admin_title %}Wnioski adopcyjne{% endblock %}
+{% block admin_subtitle %}Przeglądaj zgłoszenia i aktualizuj ich status bez eksportowania danych poza aplikację.{% endblock %}
+
+{% block admin_content %}
+<div class="table-card">
+    <div class="table-head">
+        <h3>Zgłoszenia adopcyjne</h3>
+    </div>
+    <form class="filter-panel compact-filter" method="get">
+        <div class="filter-grid">
+            <div class="field">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Wszystkie</option>
+                    {% for value, label in application_statuses %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-main">Filtruj</button>
+            <a href="{% url 'admin_applications' %}" class="btn btn-light">Reset</a>
+        </div>
+    </form>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Użytkownik</th><th>Zwierzę</th><th>Schronisko</th><th>Status</th><th>Data</th><th>Akcje</th></tr></thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>
+                        <strong>{{ app.applicant_name|default:app.applicant.username }}</strong><br>
+                        {{ app.applicant_email|default:app.applicant.email }}<br>
+                        <span class="muted">{{ app.phone_number }}</span>
+                    </td>
+                    <td>{{ app.animal.name }}</td>
+                    <td>{{ app.animal.shelter.name }}<br>{{ app.animal.shelter.city|title }}</td>
+                    <td>{{ app.get_status_display }}</td>
+                    <td>{{ app.created_at|date:"d.m.Y" }}</td>
+                    <td><button class="btn btn-light small-btn" type="button" data-modal-open="application-modal-{{ app.id }}">Szczegóły</button></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6">Brak wniosków w wybranym widoku.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% for app in applications %}
+    <dialog class="modal" id="application-modal-{{ app.id }}" data-modal aria-labelledby="application-title-{{ app.id }}">
+        <div class="modal-head">
+            <div>
+                <span class="badge">{{ app.get_status_display }}</span>
+                <h3 id="application-title-{{ app.id }}">Wniosek: {{ app.animal.name }}</h3>
+                <p class="muted">{{ app.created_at|date:"d.m.Y H:i" }}</p>
+            </div>
+            <button class="btn btn-light small-btn" type="button" data-modal-close>Zamknij</button>
+        </div>
+
+        <div class="modal-grid">
+            <section class="modal-section">
+                <h4>Osoba składająca wniosek</h4>
+                <p><strong>{{ app.applicant_name|default:app.applicant.username }}</strong></p>
+                <p>{{ app.applicant_email|default:app.applicant.email }}</p>
+                <p>{{ app.phone_number }}</p>
+            </section>
+            <section class="modal-section">
+                <h4>Zwierzę i schronisko</h4>
+                <p><strong>{{ app.animal.name }}</strong> - {{ app.animal.get_status_display }}</p>
+                <p>{{ app.animal.shelter.name }}, {{ app.animal.shelter.city|title }}</p>
+                <p>{{ app.animal.shelter.phone|default:"Brak telefonu" }}{% if app.animal.shelter.email %}, {{ app.animal.shelter.email }}{% endif %}</p>
+            </section>
+        </div>
+
+        <section class="modal-section">
+            <h4>Warunki mieszkaniowe</h4>
+            <p>{{ app.living_conditions|default:"Brak informacji"|linebreaksbr }}</p>
+        </section>
+        <section class="modal-section">
+            <h4>Doświadczenie ze zwierzętami</h4>
+            <p>{{ app.experience|default:"Brak informacji"|linebreaksbr }}</p>
+        </section>
+
+        <form method="post" action="{% url 'admin_application_update' %}" class="modal-form">
+            {% csrf_token %}
+            <input type="hidden" name="application_id" value="{{ app.id }}">
+            <div class="form-grid">
+                <div class="field">
+                    <label for="status-{{ app.id }}">Status wniosku</label>
+                    <select id="status-{{ app.id }}" name="status">
+                        {% for value, label in application_statuses %}
+                        <option value="{{ value }}" {% if app.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="contact-at-{{ app.id }}">Planowany telefon</label>
+                    <input id="contact-at-{{ app.id }}" name="contact_at" type="datetime-local" value="{% if app.contact_at %}{{ app.contact_at|date:'Y-m-d' }}T{{ app.contact_at|time:'H:i' }}{% endif %}">
+                </div>
+            </div>
+            <div class="field">
+                <label for="contact-message-{{ app.id }}">Informacja dla adoptującego</label>
+                <textarea id="contact-message-{{ app.id }}" name="contact_message" rows="4" placeholder="Np. Gratulujemy, adopcja została zatwierdzona. Zadzwonimy w wybranym terminie, aby omówić odbiór zwierzęcia.">{{ app.contact_message }}</textarea>
+            </div>
+            <p class="muted">Ta informacja pojawi się u użytkownika przy zatwierdzonym wniosku.</p>
+            <div class="modal-actions">
+                <button class="btn btn-main" type="submit">Zapisz status i komunikat</button>
+            </div>
+        </form>
+    </dialog>
+    {% endfor %}
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="pagination" aria-label="Stronicowanie">
+        {% if page_obj.has_previous %}<a class="btn btn-light small-btn" href="?status={{ status_filter }}&page={{ page_obj.previous_page_number }}">Poprzednia</a>{% endif %}
+        <span class="badge">Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a class="btn btn-light small-btn" href="?status={{ status_filter }}&page={{ page_obj.next_page_number }}">Następna</a>{% endif %}
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

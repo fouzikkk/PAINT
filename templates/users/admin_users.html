@@ -1,0 +1,99 @@
+﻿{% extends 'users/admin_base.html' %}
+
+{% block admin_title %}Użytkownicy{% endblock %}
+{% block admin_subtitle %}Lista kont jest dzielona na strony, żeby panel pozostał szybki i czytelny.{% endblock %}
+
+{% block admin_content %}
+<div class="table-card">
+    <h3>Zarejestrowani użytkownicy</h3>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Konto</th><th>Dane kontaktowe</th><th>Status</th><th>Rola</th><th>Wnioski adopcyjne</th></tr></thead>
+            <tbody>
+                {% for account in registered_users %}
+                <tr>
+                    <td>
+                        <strong>{{ account.username }}</strong><br>
+                        {{ account.email|default:"brak e-maila" }}
+                    </td>
+                    <td>
+                        {{ account.profile.full_name|default:"-" }}<br>
+                        {{ account.profile.phone_number|default:"-" }}
+                    </td>
+                    <td>{% if account.is_active %}Aktywne{% else %}Nieaktywne{% endif %}</td>
+                    <td>{% if account.is_staff %}Administrator{% else %}Osoba adoptująca{% endif %}</td>
+                    <td>
+                        <strong>{{ account.applications.all|length }}</strong> wniosków<br>
+                        <button class="btn btn-light small-btn" type="button" data-modal-open="user-modal-{{ account.id }}">Szczegóły</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">Brak użytkowników.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% for account in registered_users %}
+    <dialog class="modal" id="user-modal-{{ account.id }}" data-modal aria-labelledby="user-title-{{ account.id }}">
+        <div class="modal-head">
+            <div>
+                <span class="badge">{% if account.is_staff %}Administrator{% else %}Osoba adoptująca{% endif %}</span>
+                <h3 id="user-title-{{ account.id }}">{{ account.username }}</h3>
+                <p class="muted">{{ account.email|default:"brak e-maila" }}</p>
+            </div>
+            <button class="btn btn-light small-btn" type="button" data-modal-close>Zamknij</button>
+        </div>
+
+        <div class="modal-grid">
+            <section class="modal-section">
+                <h4>Dane kontaktowe</h4>
+                <p><strong>{{ account.profile.full_name|default:"Brak imienia i nazwiska" }}</strong></p>
+                <p>{{ account.profile.phone_number|default:"Brak telefonu" }}</p>
+            </section>
+            <section class="modal-section">
+                <h4>Status konta</h4>
+                <p>{% if account.is_active %}Aktywne{% else %}Nieaktywne{% endif %}</p>
+                <p>{% if account.is_staff %}Administrator{% else %}Osoba adoptująca{% endif %}</p>
+            </section>
+        </div>
+
+        <section class="modal-section">
+            <h4>Wnioski i adoptowane zwierzęta</h4>
+            <div class="summary-list">
+                {% for app in account.applications.all %}
+                <article class="summary-item">
+                    <div>
+                        <strong>{{ app.animal.name }}</strong>
+                        <span class="badge">{{ app.get_status_display }}</span>
+                    </div>
+                    <p class="muted">{{ app.created_at|date:"d.m.Y" }} | {{ app.animal.shelter.name }}, {{ app.animal.shelter.city|title }}</p>
+                    {% if app.status == 'approved' %}
+                    <p><strong>Adoptowane zwierzę:</strong> {{ app.animal.name }}</p>
+                    {% endif %}
+                    <p><strong>Warunki mieszkaniowe:</strong><br>{{ app.living_conditions|default:"Brak informacji"|linebreaksbr }}</p>
+                    <p><strong>Doświadczenie ze zwierzętami:</strong><br>{{ app.experience|default:"Brak informacji"|linebreaksbr }}</p>
+                    {% if app.contact_message %}
+                    <p><strong>Informacja przekazana użytkownikowi:</strong><br>{{ app.contact_message|linebreaksbr }}</p>
+                    {% endif %}
+                    {% if app.contact_at %}
+                    <p><strong>Planowany kontakt:</strong> {{ app.contact_at|date:"d.m.Y H:i" }}</p>
+                    {% endif %}
+                </article>
+                {% empty %}
+                <p>Ten użytkownik nie złożył jeszcze wniosku.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </dialog>
+    {% endfor %}
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="pagination" aria-label="Stronicowanie">
+        {% if page_obj.has_previous %}<a class="btn btn-light small-btn" href="?page={{ page_obj.previous_page_number }}">Poprzednia</a>{% endif %}
+        <span class="badge">Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a class="btn btn-light small-btn" href="?page={{ page_obj.next_page_number }}">Następna</a>{% endif %}
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
