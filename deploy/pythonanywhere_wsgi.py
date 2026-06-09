@@ -1,10 +1,3 @@
-﻿"""
-Szablon pliku WSGI dla PythonAnywhere Free.
-
-Wklej zawartość tego pliku do WSGI file z zakładki Web w PythonAnywhere.
-Przed zapisaniem zamień TWOJ_LOGIN na nazwę swojego konta PythonAnywhere.
-"""
-
 import os
 import sys
 
@@ -18,9 +11,6 @@ if PROJECT_DIR not in sys.path:
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'przyjazna_lapa.settings')
 
 
-
-
-# Zmień ten klucz na własny, długi, losowy tekst przed uruchomieniem publicznym.
 os.environ.setdefault('PAINT_SECRET_KEY', 'CHANGE-ME-pythonanywhere-free-secret-key')
 os.environ.setdefault('PAINT_DEBUG', 'False')
 os.environ.setdefault('PAINT_ALLOWED_HOSTS', f'{USERNAME}.pythonanywhere.com,.pythonanywhere.com')
